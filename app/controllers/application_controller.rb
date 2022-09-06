@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::API
 
     rescue_from CanCan::AccessDenied do |exception|
-        render json: {message: "You are not authorised to perform this action"}
+        render json: {message: "You are not authorised to perform this action", sign_in_url: user_session_url }, status: 401
         
     end
 

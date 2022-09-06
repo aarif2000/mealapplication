@@ -1,4 +1,4 @@
-        class Hotel::RecipesController < ApplicationController 
+        class Hotels::RecipesController < ApplicationController 
             load_and_authorize_resource
             def index 
                 @recipe=Recipe.all
@@ -39,8 +39,5 @@
        
           def recipe_params 
            params.require(:recipe).permit(:name,:description,:ingredients)
-        
-         end
-     
         end
-        
+    end

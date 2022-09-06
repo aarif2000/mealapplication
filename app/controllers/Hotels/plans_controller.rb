@@ -1,6 +1,7 @@
 module Hotels
 
     class PlansController < ApplicationController 
+      load_and_authorize_resource
         def index 
             @plans=Plan.all
             render json: {plan: show_plans }, status: 200 
@@ -63,6 +64,8 @@ module Hotels
             if @activate_plan.save
               if current_user.update(active_plan: true, plan_duration: @plan_duration.to_i, expiry_date: @expiry_date)
                 render json: { message: 'purchase successfull', bill: generate_bill }, status: 200
+               UserMailer.with(user: current_user ).welcome_email.deliver_later
+
               else
                 render json: { message: 'something wrong' }, status: 500
               end
@@ -75,7 +78,7 @@ module Hotels
         # send plan activate start
 
         def send_plan_is_activated_response
-            render json: { message: "your plan is already activated try to buy after #{current_user.expiry_date}",
+            render json: { message: "your already having an active plan  buy after #{current_user.expiry_date}",
                               plan_expires_on: current_user.expiry_date }, status: 406
         end
 
@@ -88,7 +91,7 @@ module Hotels
               plan_meal = {}
               plan_meal[:day] = day.for_day
               day.meals.each do |meal|
-                plan_meal[meal.meal_category.name] = give_recipe(meal.recipe)
+                plan_meal[meal.meal_category.name] = give_recipe(meal.recipe) 
               end
               plan_meals << plan_meal
             end
@@ -157,6 +160,7 @@ module Hotels
         def plan_params 
             params.require(:plan).permit(:name,:plan_duration,:plan_cost) 
         end
+        
         def variables_for_plan
             @plan_cost = params[:plan][:plan_cost].to_i
             @plan_duration = params[:plan][:plan_duration].to_i
